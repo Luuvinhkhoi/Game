@@ -1,6 +1,4 @@
 import { useState, useEffect, useRef } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 
 function App() {
@@ -16,13 +14,13 @@ function App() {
   const isAutoPlayRef = useRef(false)
   const getRandomPosition = () => {
     const top = Math.floor(Math.random() * 300); 
-    const left = Math.floor(Math.random() * window.innerWidth*0.8);
+    const left = Math.floor(Math.random() * window.innerWidth*0.7);
+    console.log(window.innerWidth*0.8)
     return { top, left };
   };
   const circleClick = (index) => {
     const clickedCircle = circle[index]
-    console.log(currentTarget)
-    console.log(clickedCircle.index)
+    if(isGameOver) return
     if (clickedCircle.index !== currentTarget) {
       setIsGameOver(true)
     }
@@ -53,7 +51,6 @@ function App() {
             ? { ...item, isCountingDown: true, countdown: 3 }
             : item      
         ))
-        console.log(index)
         setCurrentTarget(index+2)
         if (index === circle.length - 1) {
           setIsAutoPlay(false);
@@ -114,20 +111,47 @@ function App() {
         <p>{gameTime}s</p>
       </div>
       <div style={{display:'flex', alignItems:'center', gap:'2rem'}}>
-          {buttonPlay?<button onClick={()=>{play(),setIsDone(false), setIsGameOver(false), setGameTime(0), setIsPlay(true), setCurrentTarget(1), setIsAutoPlay(false), stopAutoPlay()}} >Restart</button>:<button onClick={()=>{setIsPlay(true), setButtonPlay(true), play()}}>Play</button>}
-          {isAutoPlay?<button onClick={()=>{setIsAutoPlay(false), stopAutoPlay()}}>Auto Play OFF</button>:<button onClick={()=>{autoPlay(),setIsAutoPlay(true)}}>Auto Play ON</button>}
+          {buttonPlay
+            ?
+            <button 
+              onClick={()=>{play(),setIsDone(false), setIsGameOver(false), setGameTime(0), setIsPlay(true), setCurrentTarget(1), setIsAutoPlay(false), stopAutoPlay}}
+            >Restart</button>
+            :
+            <button onClick={()=>{setIsPlay(true), setButtonPlay(true), play()}}>Play</button>
+          }
+          {isAutoPlay
+            ?
+            <button onClick={()=>{setIsAutoPlay(false), stopAutoPlay()}}>Auto Play OFF</button>
+            :
+            <button onClick={()=>{autoPlay(),setIsAutoPlay(true)}}>Auto Play ON</button>
+          }
       </div>
       <div id='play-ground'>
         {isPlay ? circle.map((item, index)=>
-            item.visible?(<div onClick={()=>circleClick(index)} style={{backgroundColor:item.isCountingDown?'red':'white',fontWeight:'bold' ,border:'solid 1px red',display:'flex', alignItems:'center', justifyContent:'center',borderRadius:'10rem', width:'40px', height:'40px', fontSize:'12px', position:'absolute', top: `${item.top}px`, left: `${item.left}px`, opacity:item.isCountingDown?item.countdown/3:1}}>
-              {item.isCountingDown ? (
-                  <div style={{ fontSize: '10px', display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center' ,gap:'4px'}}>
-                    <p>{item.index}</p>
-                    <p style={{color:'white'}}>{item.countdown}</p>
-                  </div>
-              ):(<p>{item.index}</p>)}
-            </div>):(<div></div>)         
-        ):(<div></div>)}
+            item.visible  ?
+            (
+              <div 
+                onClick={()=>circleClick(index)} 
+                className='circle' 
+                style={{
+                  backgroundColor:item.isCountingDown?'red':'white', 
+                  top: `${item.top}px`, 
+                  left: `${item.left}px`, 
+                  opacity:item.isCountingDown?item.countdown/3:1
+                }}
+              >
+                {item.isCountingDown ? (
+                    <div className='content'>
+                      <p>{item.index}</p>
+                      <p style={{color:'white'}}>{item.countdown}</p>
+                    </div>
+                ):(<p>{item.index}</p>)}
+              </div>
+            )
+            :
+            (<div></div>)         
+        ):(<div></div>)
+        }
       </div>
     </div>
   )
