@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
@@ -12,6 +12,8 @@ function App() {
   const [isDone, setIsDone]=useState(false)
   const [currentTarget, setCurrentTarget] = useState(1)
   const [isGameOver, setIsGameOver]=useState(false)
+  const [isAutoPlay, setIsAutoPlay]=useState(false)
+  const isAutoPlayRef = useRef(false)
   const getRandomPosition = () => {
     const top = Math.floor(Math.random() * 300); 
     const left = Math.floor(Math.random() * window.innerWidth*0.8);
@@ -19,6 +21,8 @@ function App() {
   };
   const circleClick = (index) => {
     const clickedCircle = circle[index]
+    console.log(currentTarget)
+    console.log(clickedCircle.index)
     if (clickedCircle.index !== currentTarget) {
       setIsGameOver(true)
     }
@@ -38,6 +42,27 @@ function App() {
       newCircles.push({index: i, visible: true, countdown: null,isCountingDown: false, top:top, left:left})
     }
     setCircle(newCircles)
+  }
+  const autoPlay=()=>{
+    isAutoPlayRef.current = true 
+    for(let index=0; index<circle.length; index++){
+      setTimeout(()=>{
+        if(isAutoPlayRef.current===false)return
+        setCircle(prev => prev.map((item, i) => 
+          i === index 
+            ? { ...item, isCountingDown: true, countdown: 3 }
+            : item      
+        ))
+        console.log(index)
+        setCurrentTarget(index+2)
+        if (index === circle.length - 1) {
+          setIsAutoPlay(false);
+        }
+      },1000*index)
+    }
+  }
+  const stopAutoPlay = () => {
+     isAutoPlayRef.current = false
   }
   useEffect(() => {
     if (isGameOver) return
@@ -88,7 +113,10 @@ function App() {
         <p>Time:</p>
         <p>{gameTime}s</p>
       </div>
-      {buttonPlay?<button onClick={()=>{play(),setIsDone(false), setIsGameOver(false), setGameTime(0), setIsPlay(true), setCurrentTarget(1)}} >Restart</button>:<button onClick={()=>{setIsPlay(true), setButtonPlay(true), play()}}>Play</button>}
+      <div style={{display:'flex', alignItems:'center', gap:'2rem'}}>
+          {buttonPlay?<button onClick={()=>{play(),setIsDone(false), setIsGameOver(false), setGameTime(0), setIsPlay(true), setCurrentTarget(1), setIsAutoPlay(false), stopAutoPlay()}} >Restart</button>:<button onClick={()=>{setIsPlay(true), setButtonPlay(true), play()}}>Play</button>}
+          {isAutoPlay?<button onClick={()=>{setIsAutoPlay(false), stopAutoPlay()}}>Auto Play OFF</button>:<button onClick={()=>{autoPlay(),setIsAutoPlay(true)}}>Auto Play ON</button>}
+      </div>
       <div id='play-ground'>
         {isPlay ? circle.map((item, index)=>
             item.visible?(<div onClick={()=>circleClick(index)} style={{backgroundColor:item.isCountingDown?'red':'white',fontWeight:'bold' ,border:'solid 1px red',display:'flex', alignItems:'center', justifyContent:'center',borderRadius:'10rem', width:'40px', height:'40px', fontSize:'12px', position:'absolute', top: `${item.top}px`, left: `${item.left}px`, opacity:item.isCountingDown?item.countdown/3:1}}>
