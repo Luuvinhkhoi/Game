@@ -91,11 +91,14 @@ function App() {
         isAutoPlayRef.current = false
         return
       }
-      setCircle(prev => prev.map((item, i) => 
-        i === currentIndex 
-          ? { ...item, isCountingDown: true, countdown: 3 }
-          : item
-      ))
+      
+      setCircle(prev => prev.map((item, i) => {
+        if (i !== currentIndex) return item
+        if (!item.isCountingDown) {
+          return { ...item, isCountingDown: true, countdown: 3 }
+        }
+        return item
+      }))
       setCurrentTarget(currentIndex + 2)
       autoPlayIndexRef.current++
     }, 1000)
