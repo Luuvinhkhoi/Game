@@ -13,10 +13,24 @@ function App() {
   const [isAutoPlay, setIsAutoPlay]=useState(false)
   const isAutoPlayRef = useRef(false)
   const getRandomPosition = () => {
-    const top = Math.floor(Math.random() * 300); 
-    const left = Math.floor(Math.random() * window.innerWidth*0.7);
-    console.log(window.innerWidth*0.8)
-    return { top, left };
+    if(window.innerWidth>1200){
+      const top = Math.floor(Math.random() * 350); 
+      const left = Math.floor(Math.random() * window.innerWidth*0.9);
+      return { top, left };
+    } else if(window.innerWidth>700 && window.innerWidth<1200){
+      const top = Math.floor(Math.random() * 350); 
+      const left = Math.floor(Math.random() * window.innerWidth*0.85);
+      return { top, left };
+    } else if(window.innerWidth>400 && window.innerWidth<700){
+      const top = Math.floor(Math.random() * 350); 
+      const left = Math.floor(Math.random() * window.innerWidth*0.8);
+      return { top, left };
+    } 
+    else{
+      const top = Math.floor(Math.random() * 350); 
+      const left = Math.floor(Math.random() * window.innerWidth*0.7);
+      return { top, left };
+    }
   };
   const circleClick = (index) => {
     const clickedCircle = circle[index]
@@ -136,7 +150,8 @@ function App() {
                 style={{
                   backgroundColor:item.isCountingDown?'red':'white', 
                   top: `${item.top}px`, 
-                  left: `${item.left}px`, 
+                  left: `${item.left}px`,
+                  zIndex:`${(inputValue - item.index + 1) * 10}`, 
                   opacity:item.isCountingDown?item.countdown/3:1
                 }}
               >
