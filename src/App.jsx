@@ -12,12 +12,29 @@ function App() {
   const [isGameOver, setIsGameOver]=useState(false)
   const [isAutoPlay, setIsAutoPlay]=useState(false)
   const isAutoPlayRef = useRef(false)
+  const autoPlayIntervalRef = useRef(null)
+  const autoPlayIndexRef = useRef(0)
   const getRandomPosition = () => {
-    if(window.innerWidth>1200){
+    if(window.innerWidth>1700){
+      const top = Math.floor(Math.random() * 350); 
+      const left = Math.floor(Math.random() * window.innerWidth*0.95);
+      return { top, left };
+    } else if(window.innerWidth>1500){
+      const top = Math.floor(Math.random() * 350); 
+      const left = Math.floor(Math.random() * window.innerWidth*0.93);
+      return { top, left };
+    }
+    else if(window.innerWidth>1200 && window.innerWidth<1500){
+      const top = Math.floor(Math.random() * 350); 
+      const left = Math.floor(Math.random() * window.innerWidth*0.915);
+      return { top, left };
+    } 
+     else if(window.innerWidth>900 && window.innerWidth<1200){
       const top = Math.floor(Math.random() * 350); 
       const left = Math.floor(Math.random() * window.innerWidth*0.9);
       return { top, left };
-    } else if(window.innerWidth>700 && window.innerWidth<1200){
+    } 
+    else if(window.innerWidth>700 && window.innerWidth<900){
       const top = Math.floor(Math.random() * 350); 
       const left = Math.floor(Math.random() * window.innerWidth*0.85);
       return { top, left };
@@ -37,6 +54,7 @@ function App() {
     if(isGameOver) return
     if (clickedCircle.index !== currentTarget) {
       setIsGameOver(true)
+      stopAutoPlay()
     }
     
     setCircle(prev => prev.map((item, i) => 
@@ -55,25 +73,48 @@ function App() {
     }
     setCircle(newCircles)
   }
-  const autoPlay=()=>{
-    isAutoPlayRef.current = true 
-    for(let index=0; index<circle.length; index++){
-      setTimeout(()=>{
-        if(isAutoPlayRef.current===false)return
-        setCircle(prev => prev.map((item, i) => 
-          i === index 
-            ? { ...item, isCountingDown: true, countdown: 3 }
-            : item      
-        ))
-        setCurrentTarget(index+2)
-        if (index === circle.length - 1) {
-          setIsAutoPlay(false);
-        }
-      },1000*index)
+  const autoPlay = () => {
+    if (autoPlayIntervalRef.current) {
+      clearInterval(autoPlayIntervalRef.current)
     }
+    isAutoPlayRef.current = true
+
+    autoPlayIntervalRef.current = setInterval(() => {
+      if (!isAutoPlayRef.current) {
+        clearInterval(autoPlayIntervalRef.current)
+        return
+      }
+      const currentIndex = autoPlayIndexRef.current
+      if (currentIndex >= circle.length) {
+        clearInterval(autoPlayIntervalRef.current)
+        setIsAutoPlay(false)
+        isAutoPlayRef.current = false
+        return
+      }
+      setCircle(prev => prev.map((item, i) => 
+        i === currentIndex 
+          ? { ...item, isCountingDown: true, countdown: 3 }
+          : item
+      ))
+      setCurrentTarget(currentIndex + 2)
+      autoPlayIndexRef.current++
+    }, 1000)
   }
+
   const stopAutoPlay = () => {
-     isAutoPlayRef.current = false
+    isAutoPlayRef.current = false
+    if (autoPlayIntervalRef.current) {
+      clearInterval(autoPlayIntervalRef.current)
+      autoPlayIntervalRef.current = null
+    }
+    autoPlayIndexRef.current = 0
+  }
+  const pauseAutoPlay=()=>{
+    isAutoPlayRef.current = false
+    if (autoPlayIntervalRef.current) {
+      clearInterval(autoPlayIntervalRef.current)
+      autoPlayIntervalRef.current = null
+    }
   }
   useEffect(() => {
     if (isGameOver) return
@@ -128,17 +169,25 @@ function App() {
           {buttonPlay
             ?
             <button 
-              onClick={()=>{play(),setIsDone(false), setIsGameOver(false), setGameTime(0), setIsPlay(true), setCurrentTarget(1), setIsAutoPlay(false), stopAutoPlay}}
+              onClick={()=>{
+                play(),
+                setIsDone(false),
+                setIsGameOver(false),
+                setGameTime(0), 
+                setIsPlay(true), 
+                setCurrentTarget(1),
+                setIsAutoPlay(false),
+                stopAutoPlay()}}
             >Restart</button>
             :
             <button onClick={()=>{setIsPlay(true), setButtonPlay(true), play()}}>Play</button>
           }
-          {isAutoPlay
+          {isGameOver || isDone ?<div></div>:(isAutoPlay
             ?
-            <button onClick={()=>{setIsAutoPlay(false), stopAutoPlay()}}>Auto Play OFF</button>
+            <button onClick={()=>{setIsAutoPlay(false), pauseAutoPlay()}}>Auto Play OFF</button>
             :
             <button onClick={()=>{autoPlay(),setIsAutoPlay(true)}}>Auto Play ON</button>
-          }
+          )}
       </div>
       <div id='play-ground'>
         {isPlay ? circle.map((item, index)=>
