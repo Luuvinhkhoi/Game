@@ -169,7 +169,6 @@ function App() {
         ):(<div></div>)
         }
       </div>
-      {isAutoPlay?<div>Next: {currentTarget}</div>:<div></div>}
     </div>
   )
 }
