@@ -147,6 +147,7 @@ function App() {
               <div 
                 onClick={()=>circleClick(index)} 
                 className='circle' 
+                key={item.index}
                 style={{
                   backgroundColor:item.isCountingDown?'red':'white', 
                   top: `${item.top}px`, 
@@ -168,6 +169,7 @@ function App() {
         ):(<div></div>)
         }
       </div>
+      {isAutoPlay?<div>Next: {currentTarget}</div>:<div></div>}
     </div>
   )
 }
